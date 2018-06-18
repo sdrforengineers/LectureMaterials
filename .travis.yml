@@ -1,0 +1,24 @@
+sudo: required
+dist: trusty
+before_install:
+- sudo apt-get -qq update && sudo apt-get install -y --no-install-recommends texlive-fonts-recommended
+  texlive-latex-extra texlive-fonts-extra dvipng texlive-latex-recommended
+script:
+- cd Slides
+- make lectures
+- zip lectures.zip *.pdf
+- make labs
+- zip labs.zip *.pdf
+- zip logs.zip *.log
+deploy:
+  provider: releases
+  api_key:
+    secure: AHnLO4QMJplWuIuGMjp6EPw6eo4kU+5lLStlWjxEC4qvbPxtJ+u9GutrXKUxz2BzsMJUMi0LY/kzsk656sGTi8z5T9uSads/GlIDLEamrhzOSla5/uSIUfCTHmarRIJ9PlQYE0npGg003ounDksJMktluVag+aUHVa25YYTdd9Sz/+6/SOOMAmkDdqQuuPi/Hl0qfm1hKCxBlx4KQvFIuUcw7++u2yz5PYLvF63s/BxaCAFKRQqXep0qdfUPHHZfGWvkShKkmDyl7PYmOKytdqcMOJKyi5oS3ElHD03TXyzx66zGtspVqOqNN5N+0cmuqnoMnxNSLM64xTp3/vIfy8PctLMUYdyj6ReCtUfhy5K2fpwSPr7tXf55YdTBswhneLZ7SiZaD8keU6rFEllsxKqRZYFV8VCWFK3NutYsrPsg8gwx8xOdPu9fZBo10/A7drgOorAXqcpXXM30i6k2sAFizWIEagWuBS5zqni+X0feDKzlwwJCaSII5hRYe8VXd8dBmuOC9DqLqKMyizjpcqjkRqpZSm4DRa5D1t9pxVEwa86NJiRhN30uKHvhap030/J5golsGLaOYnffLHkV+Y0VorLtKu0+/nB9g5CywsxaL2UkNfzHNjpQTDslIZWV5/iaIktP/i6+HXA3P35RtxSsEbYCj6416KC1ruQ/Pw0=
+  file:
+    - lectures.zip
+    - labs.zip
+    - logs.zip
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: sdrforengineers/LectureMaterials
