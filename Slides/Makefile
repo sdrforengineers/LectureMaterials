@@ -16,4 +16,4 @@ clean_pdf:
 	rm *.pdf
 
 %: %.tex
-	pdflatex --interaction=batchmode $@
+	pdflatex $@
