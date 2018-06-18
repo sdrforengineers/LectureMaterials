@@ -7,6 +7,7 @@ script:
 - cd Slides
 - make lectures
 - zip lectures.zip *.pdf
+- make clean_pdf
 - make labs
 - zip labs.zip *.pdf
 - zip logs.zip *.log
