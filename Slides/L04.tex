@@ -1,0 +1,171 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 04: Gaussian Noise Channels}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{3.5}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Noise Channel Model}
+  
+  \centering
+  Binary Information Source $\rightarrow$ $m[n]$\\
+  $\downarrow$\\
+  Transmitter $\rightarrow$ $s(t)$\\
+  $\downarrow$\\
+  Channel $\rightarrow$ $s(t)+n(t)$\\
+  $\downarrow$\\
+  Receiver $\leftarrow$ $r(t)$\\
+  $\downarrow$\\
+  Binary Information Sink $\leftarrow$ $\hat{m}[n]$
+
+}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Gaussian Random Variable}
+  
+  \begin{itemize}
+   \item We frequently use \textbf{Gaussian random variables} to model noise contribution to transmitted signal
+   \item Gaussian random variable mathematically expressed as:
+   \begin{equation}
+    f(x)=\frac{1}{\sqrt{2\pi{\sigma^2}}}e^{-((x-\mu)/\sigma)^2/2}
+   \end{equation}
+   where $\mu$ is the mean and $\sigma$ is the standard deviation
+  \end{itemize}
+
+  
+}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Bivariate Gaussian}
+
+General definition for bivariate
+Gaussian density with parameters $\mu_X$, $\mu_Y$, $\sigma_X^2$,
+$\sigma_Y^2$, and correlation coefficient $\rho$ is given by:
+\begin{equation}
+f_{XY}(x,y)=\frac{\exp\left(\frac{-1}{2(1-\rho^2)}\left(\left(\frac{x-\mu_X}{\sigma_X}\right)^2-2\rho\left(\frac{x-\mu_X}{\sigma_X}\right)\left(\frac{y-\mu_Y}{\sigma_Y}\right)+\left(\frac{y-\mu_Y}{\sigma_Y}\right)^2\right)\right)}{2\pi\sigma_X\sigma_Y\sqrt{1-\rho^2}},
+\end{equation}
+where {\it correlation coefficient} is defined as:
+\begin{equation}
+    \rho=E\left[\left(\frac{x-\mu_X}{\sigma_X}\right)\left(\frac{y-\mu_Y}{\sigma_Y}\right)\right].
+\end{equation}
+  
+  
+}
+  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Zero Correlation Scenario}
+  
+  \centering
+  What happens when $\rho=0$?\\
+  $\downarrow$\\
+  $f_{XY}(x,y)=f_{X}(x)f_{Y}(y)$\\
+  \vspace*{1cm}
+  $\rightarrow$ How does this look like?
+  
+  
+  }
+  
+  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Impact of Gaussian Noise Channels}
+  
+\begin{figure}
+\centering
+\begin{minipage}[framed]{0.9\textwidth}
+\begin{lstlisting}
+% Noise standard deviation
+nstddev = 0.1;
+
+% Create data stream of information
+wavefm = [];
+for ind=0:1:9,
+  if(round(rand(1,1))==1)
+    wavefm = [wavefm ones(1,1000)];
+  else
+    wavefm = [wavefm zeros(1,1000)];  
+  end;
+end;
+
+% Add noise to the transmission
+noisysig = wavefm + nstddev.*randn(1,length(wavefm));
+\end{lstlisting}
+\end{minipage}
+\captionsetup{labelformat=empty}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+\end{document}

@@ -1,0 +1,146 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 10: Signal Space Concept}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.3}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Signal Vectors}
+
+    \begin{itemize}
+        \item Let $\phi_j(t)$ be an orthnormal set of functions on the time interval $[0,T]$ such that:
+        \begin{equation}
+            \int\limits_0^T\phi_i(t)\phi_j(t)dt=\left\{
+            \begin{array}{ll}
+              1 & i=j \\
+              0 & \mathsf{otherwise}
+            \end{array}
+            \right.\nonumber
+        \end{equation}
+        \item Let $s_i(t)$ be the modulation signal that we can represent in terms of the orthonormal functions:
+        \begin{equation}
+            s_i(t)=\sum\limits_{k=1}^{N}s_{ik}\phi_k(t)
+        \end{equation}
+        which can be represented by the vector:
+        \begin{equation}
+            s_i(t)\rightarrow\mathbf{s}_i=(s_{i1},~s_{i2},~s_{i3},\ldots{s_{iN}})
+        \end{equation}
+    \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Vector Representation of $s_i(t)$}
+  
+\begin{itemize}
+ \item Let us look at a sample vector representation of $s_i(t)$ in three dimensional space using basis functions $\phi_1(t)$, $\phi_2(t)$, and $\phi_3(t)$
+\end{itemize}
+
+}
+\frame
+{
+  \frametitle{Vector Manipulations}
+
+    \begin{itemize}
+        \item To find $s_{ik}$, solve:
+        \begin{equation}
+            \int\limits_0^Ts_i(t)\phi_l(t)dt=\sum\limits_{k=1}^{N}s_{ik}\int\limits_0^T\phi_k(t)\phi_l(t)dt=s_{il}
+        \end{equation}
+        \item The vector dot product between $s_i(t)$ and $s_j(t)$ is equal to:
+        \begin{equation}
+            \int\limits_0^Ts_i(t)s_j(t)dt=\mathbf{s}_i\cdot\mathbf{s}_j=\rho_{ij}
+        \end{equation}
+        while the energy of a signal $s_i(t)$ is equal to:
+        \begin{equation}
+            E_{s_i}=\int\limits_0^Ts_i^2(t)dt=\mathbf{s}_i\cdot\mathbf{s}_i=||\mathbf{s}_i||^2
+        \end{equation}
+    \end{itemize}
+}
+\frame
+{
+  \frametitle{Euclidean Distance}
+
+    \begin{itemize}
+        \item To compute the {\it Euclidean Distance} using signal space vectors, we need to solve:
+        \begin{equation}
+        \begin{split}
+            d_{\min}^2&=\int\limits_0^T\Delta{s_{ij}^2(t)}dt=\int\limits_0^T(s_i(t)-s_j(t))^2dt\\
+            &=||\mathbf{s}_i-\mathbf{s}_j||^2=(\mathbf{s}_i-\mathbf{s}_j)\cdot(\mathbf{s}_i-\mathbf{s}_j)\\
+            &=E_{s_i}+E_{s_j}-2\rho_{ij}\nonumber
+        \end{split}
+        \end{equation}
+        where:
+        \begin{equation}
+            \rho_{ij}=\int\limits_0^Ts_i(t)s_j(t)dt=\mathbf{s}_i\cdot\mathbf{s}_j
+        \end{equation}
+    \end{itemize}
+}
+\frame
+{
+  \frametitle{Solving for the Power Efficiency}
+
+    \begin{itemize}
+        \item Choose orthonormal basis functions $\phi_i(t)$, $i=1,2,\ldots,k$, where $k$ is the dimension of the signal space
+        \item Find $\mathbf{s}_i$, $i=1,2,\ldots,M$ where $\mathbf{s}_i=(s_{i1},~s_{i2},\ldots{s_{ik}})$ and $s_{ij}=\int\limits_0^Ts_i(t)\phi_j(t)dt$
+        \item Consequently, solve for:
+        \begin{equation}
+        \begin{split}
+            d_{\min}^2&=\min\limits_{i\neq{j}}||{\mathbf{s}_i-\mathbf{s}_j}||^2\\
+            \bar{E}_s&=\frac{1}{M}\sum\limits_{i=1}^{M}||\mathbf{s}_i||^2\\
+            \bar{E}_b&=\bar{E}_s/\log_2(M)\\
+            \varepsilon_p&=d_{\min}^2/\bar{E}_b\nonumber
+        \end{split}
+        \end{equation}
+    \end{itemize}
+}
+
+
+
+\end{document}

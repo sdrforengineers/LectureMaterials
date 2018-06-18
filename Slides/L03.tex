@@ -1,0 +1,214 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 03: Modeling Randomness in Communication Systems}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{3.3}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{What Is Probability?}
+
+  \begin{itemize}
+   \item It is not about finding the exact value produced by a random event but rather accurately characterizing the random event itself and all its possible outcomes
+   \item Two types of random events: \textit{discrete} and \textit{continuous}
+   \item Probability theory involves \textit{mapping} physical phenomena to a mathematical framework such that we can employ a variety of useful tools for analysis
+   \item We can represent a random event via the ``black box'' model
+  \end{itemize}
+
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Random Variables}
+
+  \begin{itemize}
+   \item Random variable ${X}$ is a function that maps an outcome $\omega$ from the sample space $\Omega$ to a real number $x$
+   \item Sample space $\Omega$ is the domain of ${X}$ while $\Omega_x$ is the range
+   \item How does this look like graphically?
+  \end{itemize}
+
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Probability}
+
+  \begin{itemize}
+   \item Probability that discrete random variable ${X}$ produces an output within $[a,b)$ is given by:
+   \begin{equation}
+    P(a\le{X}<b)=\sum\limits_{i=a}^{b-1}p_X(i)
+   \end{equation}
+   where $p_X(i)$ is the probability mass function (PMF)
+  \item Probability that continuous random variable ${X}$ produces an output within $[a,b)$ is given by:
+   \begin{equation}
+    P(a\le{X}<b)=\int\limits_{a}^{b}f(t)dt
+   \end{equation}
+   where $f(t)$ is the probability density function (PDF)
+  \end{itemize}
+
+
+  }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Expectation}
+
+  \begin{itemize}
+   \item Probability is about characterizing random events and their behavior
+   \item One such mathematical tool is \textit{Expectation}
+   \begin{itemize}
+    \item It can be roughly described as a weighted average of all possible outcomes of a random event
+   \end{itemize}
+   \item We define Expectation as:
+   \begin{equation}
+    E[g(X)]=\int\limits_{-\infty}^{+\infty}g(x)f(x)dx
+   \end{equation}
+    \item We use Expectation to give us some understanding about the behavior of a random variable
+  \end{itemize}
+
+
+  }
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{CDFs and PDFs}
+
+  \begin{itemize}
+   \item To \textbf{perfectly} describe a random event, we use \textit{Cumulative Distribution Functions} (CDFs) and \textit{Probability Density Functions} (PDFs)
+   \item Mathematically, this is described as:
+   \begin{equation}
+    F_X(x)=P(X\le{x})=\int\limits_{-\infty}^{x}f(t)dt
+   \end{equation}
+   \item Here is a useful trick for calculating the probability $P(a\le{X}<b)$:
+   \begin{equation}
+    P(a\le{X}<b)=P(X<b)-P(X<a)=F_X(b)-F_X(a)
+   \end{equation}
+  \end{itemize}
+
+  }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Important Communications-Related PDFs}
+
+  \begin{itemize}
+   \item Uniform:
+   \begin{equation}
+    f(x)=\begin{cases}
+          \frac{1}{(b-a)},&a\le{x}<{b}\\
+          0,&\mathrm{otherwise}
+         \end{cases}
+   \end{equation}
+   \item Gaussian:
+   \begin{equation}
+    f(x)=\frac{1}{\sqrt{2\pi{\sigma^2}}}e^{-((x-\mu)/\sigma)^2/2}
+   \end{equation}
+  \end{itemize}
+
+  }
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Q-Function}
+
+  \begin{itemize}
+   \item \textit{Q function} is a convenient way to express right-tail probabilities for Gaussian random variables
+   \item Mathematically, this can be expressed as:
+   \begin{eqnarray}
+    Q(x)&=1-F_X(x)=1-P(X\le{x})\\
+    &=P(X>x)=\frac{1}{\sqrt{2\pi}}\int\limits_{x}^{\infty}e^{-t^2/2}dt
+   \end{eqnarray}
+  \end{itemize}
+
+  }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Where Does Randomness Occur?}
+
+  \begin{itemize}
+   \item Several locations where randomness occurs in the communications system includes:
+   \begin{itemize}
+    \item Transmission channel
+    \item Data generation at information source
+    \item Clock jitter
+    \item Processing latency
+    \item $\ldots$
+   \end{itemize}
+
+  \end{itemize}
+
+
+  }
+
+
+\end{document}

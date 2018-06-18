@@ -1,0 +1,186 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 11: Bit Error Rate}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.4}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Mathematical Framework}
+
+    \begin{itemize}
+        \item Suppose that a signal $s_i(t)$, $i=1,2$, was transmitted across an AWGN channel with noise signal $n(t)$
+        \item A receiver intercepts $r(t)$ and needs to determine whether $s_1(t)$ or $s_2(t)$ was sent
+        \item This situation can be evaluated using {\it Hypothesis Theory}:
+        \begin{equation}
+        \begin{split}
+            \mathcal{H}_1:&~r(t)=s_1(t)+n(t),~0\le{t}\le{T}\\
+            \mathcal{H}_0:&~r(t)=s_2(t)+n(t),~0\le{t}\le{T}\nonumber
+        \end{split}
+        \end{equation}
+        where $\mathcal{H}_0$ and $\mathcal{H}_1$ are ``Hypothesis 0'' and ``Hypothesis 1''
+    \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Decision Rule}
+
+    \begin{itemize}
+        \item Suppose that $s_1(t)$ was transmitted
+        \item In general, we can determine the level of correlation between two signals $x(t)$ and $y(t)$ over the time interval $0\le{t}\le{T}$ using the expression:
+        \begin{equation}
+            \int\limits_0^Tx(t)y(t)dt\nonumber
+        \end{equation}
+    \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Decision Rule}
+
+    \begin{itemize}
+        \item Consequently, our decision rule on whether $s_1(t)$ or $s_2(t)$ was transmitted given that we observe $r(t)$ is defined as:
+        \begin{equation}
+            {\int\limits_0^Tr(t)s_1(t)dt}\ge{\int\limits_0^Tr(t)s_2(t)dt}
+        \end{equation}
+        where we assume that $s_1(t)$ was transmitted
+        \begin{itemize}
+            \item The received signal $r(t)$ is more correlated to $s_1(t)$ than $s_2(t)$
+        \end{itemize}
+     \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Error Event}
+
+    \begin{itemize}
+        \item Assuming $s_1(t)$ was transmitted, an {\it error event} occurs when:
+        \begin{equation}
+            {\int\limits_0^Tr(t)s_1(t)dt}\le{\int\limits_0^Tr(t)s_2(t)dt}
+        \end{equation}
+        \item Since $r(t)=s_1(t)+n(t)$, we can substitute this into the error event in order to obtain:
+        \begin{equation}
+        \begin{split}
+            {\int\limits_0^Ts_1^2(t)dt+\int\limits_0^Tn(t)s_1(t)dt}&\le{\int\limits_0^Ts_1(t)s_2(t)dt+\int\limits_0^Tn(t)s_2(t)dt}\\
+            E_{s_1}-\rho_{12}\le\int\limits_0^Tn(t)(s_2(t)&-s_1(t))dt\rightarrow{E_{s_1}-\rho_{12}\le{z}}\nonumber
+        \end{split}
+        \end{equation}
+    \end{itemize}
+}
+\frame
+{
+  \frametitle{Characterizing $z$}
+
+    \begin{itemize}
+        \item Since $n(t)$ is Gaussian $\rightarrow$ $z$ is Gaussian
+        \begin{itemize}
+            \item Integration is equivalent to a summation across an infinite number of samples
+            \item Summing up Gaussian random variables results in a Gaussian random variable
+        \end{itemize}
+        \item Since $z\sim\mathcal{N}(0,\sigma^2)$, we need to calculate $\sigma^2$:
+        \begin{equation}
+        \begin{split}
+            \sigma^2=E\{z^2\}&=\frac{N_0}{2}\int\limits_0^T(s_1(t)-s_2(t))^2dt=\frac{N_0}{2}(E_{s_1}+E_{s_2}-2\rho_{12})\\
+            &=N_0(E-\rho_{12})\rightarrow\mathsf{Assuming}~E_{s_1}=E_{s_2}=E
+        \end{split}
+        \end{equation}
+        where $E=E_i=\int\limits_0^Ts_i^2(t)dt$ and $\rho_{12}=\int\limits_0^Ts_1(t)s_2(t)dt$
+    \end{itemize}
+}
+\frame
+{
+  \frametitle{Solving for the Probability of Error}
+
+  \begin{itemize}
+    \item The probability of an error occurring given that a ``1'' was transmitted, i.e., $P(e|1)$, is equal to:
+    \begin{equation}
+    \begin{split}
+        P(z\ge{E-\rho_{12}})&=Q\left(\frac{E-\rho_{12}}{\sigma}\right)\rightarrow
+        \begin{array}{l}
+          \mathsf{Since}~z\sim\mathcal{N}(0,\sigma^2) \\
+          \mathsf{and}~E-\rho_{12}~\mathsf{is~constant}
+        \end{array}\\
+        &=Q\left(\sqrt{\frac{(E-\rho_{12})^2}{\sigma^2}}\right)\rightarrow\mathsf{Use}~\sigma^2=N_0(E-\rho_{12})\\
+        &=Q\left(\sqrt{\frac{E-\rho_{12}}{N_0}}\right)\nonumber
+    \end{split}
+    \end{equation}
+    where the Q-function is defined as:
+    \begin{equation}
+        Q(x)=\frac{1}{\sqrt{2\pi}}\int\limits_{x}^{\infty}e^{-t^2/2}dt
+    \end{equation}
+  \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Optimizing the Probability of Error}
+
+  \begin{itemize}
+    \item To minimize $P(e|1)$, we need to optimize $\rho_{12}$
+    \begin{itemize}
+        \item Intuitively, the best choice we can make is $s_2(t)=-s_1(t)$, which gives us $\rho_{12}=-E$
+        \item This yields $P(e|1)=Q\left(\sqrt{\frac{2\bar{E}_b}{N_0}}\right)$
+    \end{itemize}
+    \item As an exercise for the student, show that the total probability of error is equal to:
+    \begin{equation}
+        P_e=P(e|1)P(1)+P(e|0)P(0)=Q\left(\sqrt{\frac{E-\rho_{12}}{N_0}}\right)
+    \end{equation}
+    \item When $E_{s_1}\neq{E_{s_2}}$, then $d_{\min}^2=E_{s_1}+E_{s_2}-2\rho_{12}$, which yields:
+    \begin{equation}
+        P_e=Q\left(\sqrt{\frac{d_{\min}^2}{2N_0}}\right)
+    \end{equation}
+  \end{itemize}
+
+}
+
+
+\end{document}

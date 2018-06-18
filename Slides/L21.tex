@@ -1,0 +1,230 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 21: Matched Filter Receiver Realization}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.7.1}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Basic Problem}
+
+  \begin{itemize}
+    \item We need some sort of way of detecting a pulse transmitted over a channel corrupted by noise
+    \item Suppose we transmit a pulse signal $g(t)$ through an additive channel with noise $w(t)$, which produces the output $x(t)$:
+    \begin{equation}
+        x(t)=g(t)+w(t),~\mathsf{for}~0\le{t}\le{T}
+    \end{equation}
+    \item The signal $g(t)$ may represent a ``1'' or a ``0'' in a digital communication system
+    \item The signal $w(t)$ is a sample function of a white noise process of zero mean and power spectral density of $\frac{N_0}{2}$
+    \item Assume that the receiver has knowledge of all the possible waveforms $g(t)$
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Detecting $g(t)$}
+
+  \begin{itemize}
+    \item The function of the receiver is to detect the pulse signal $g(t)$ in an optimal manner given the received signal $x(t)$
+    \item To achieve this, let us filter $x(t)$ in order to minimize the effects of the noise in some statistical sense
+    \begin{itemize}
+        \item We want to enhance the probability of correct detection
+    \end{itemize}
+    \item Suppose the output of the filter $h(t)$ is $y(t)=g_0(t)+n(t)$
+    \begin{itemize}
+        \item Signal $g_0(t)$ is the filtered signal component and $n(t)$ is the filtered noise component
+    \end{itemize}
+    \item Our goal is to maximize $g_0(t)$ with respect to $n(t)$ using peak pulse SNR
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Peak Pulse SNR}
+
+  \begin{itemize}
+    \item Peak pulse SNR is defined as:
+    \begin{equation}
+        \eta=\frac{|g_0(T)|^2}{E\{n^2(t)\}}
+    \end{equation}
+    where $|g_0(T)|^2$ is the instantaneous power of the output signal at sampling instant $T$, and $E\{n^2(t)\}$ is the average power of the output noise
+    \item How do we achieve the goal of maximizing $g_0(t)$ relative to $n(t)$?
+    \begin{itemize}
+        \item Design a filter $h(t)$ that achieves the largest possible $\eta$
+    \end{itemize}
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Designing $h(t)$}
+
+  \begin{itemize}
+    \item Solving for $h(t)$ consists of evaluating the expression:
+    \begin{equation}
+        |g_0(t)|^2=\left|\int\limits_{-\infty}^{\infty}H(f)G(f)e^{j2\pi{f}{t}}df\right|^2,
+    \end{equation}
+    which is the magnitude squared of the inverse Fourier transform of $H(f)G(f)=\mathcal{F}\{h(t)\ast{g(t)}\}$
+    \item Signal $w(t)$ is white with power spectral density $\frac{N_0}{2}$
+    \begin{itemize}
+        \item Power spectral density of $n(t)$ is defined via EWK as $S_N(f)=\frac{N_0}{2}|H(f)|^2$
+    \end{itemize}
+    \item Recall that the mean-square value of a waveform is equal to:
+    \begin{equation}
+        E\{n^2(t)\}=R_N(0)=\mathcal{F}^{-1}\left.\{S_N(f)\}\right|_{\tau=0}=\frac{N_0}{2}\int\limits_{-\infty}^{\infty}|H(f)|^2df\nonumber
+    \end{equation}
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Solving for $\eta$}
+
+  \begin{itemize}
+    \item Apply the definition for $\eta$:
+    \begin{equation}
+        \eta=\frac{|g_0(T)|^2}{E\{n^2(t)\}}=\frac{\left|\int\limits_{-\infty}^{\infty}H(f)G(f)e^{j2\pi{f}{t}}df\right|^2}{\frac{N_0}{2}\int\limits_{-\infty}^{\infty}|H(f)|^2df}
+    \end{equation}
+    \item Now we need to solve for $H(f)$ that yields the largest possible $\eta$
+    \begin{itemize}
+        \item Use {\it Schwarz's Inequality} to obtain a closed-form solution
+    \end{itemize}
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Recall Schwarz's Inequality}
+
+  \begin{itemize}
+    \item If we have two complex functions, $\phi_1(x)$ and $\phi_2(x)$, such that:
+    \begin{equation}
+        \int\limits_{-\infty}^{\infty}|\phi_1(x)|^2dx<\infty\quad\mathsf{and}\quad\int\limits_{-\infty}^{\infty}|\phi_2(x)|^2dx<\infty\nonumber
+    \end{equation}
+    then:
+    \begin{equation}
+        \left|\int\limits_{-\infty}^{\infty}\phi_1(x)\phi_2(x)dx\right|^2\le\left(\int\limits_{-\infty}^{\infty}|\phi_1(x)|^2dx\right)\cdot\left(\int\limits_{-\infty}^{\infty}|\phi_1(x)|^2dx\right)\nonumber
+    \end{equation}
+    \item This becomes an equality when $\phi_1(x)=K\cdot\phi_2^{\ast}(x)$
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Completing the Derivation}
+
+  \begin{itemize}
+    \item Applying Schwarz's Inequality to this derivation, we obtain:
+    \begin{equation}
+        \left|\int\limits_{-\infty}^{\infty}H(f)G(f)e^{j2\pi{f}{t}}df\right|^2\le\left(\int\limits_{-\infty}^{\infty}|H(f)|^2df\right)\cdot\left(\int\limits_{-\infty}^{\infty}|G(f)|^2df\right)\nonumber
+    \end{equation}
+    \item Consequently, we get: $\eta\le\frac{2}{N_0}\int\limits_{-\infty}^{\infty}|G(f)|^2df$
+    \begin{itemize}
+        \item Thus, we get $H_{\mathsf{opt}}(f)=K\cdot{G}^{\ast}(f)e^{-j2\pi{fT}}$
+    \end{itemize}
+    \item To determine $H_{\mathsf{opt}}(f)$, solve for the inverse Fourier transform:
+    \begin{equation}
+        h_{\mathsf{opt}}(t)=K\cdot\int\limits_{-\infty}^{\infty}G^{\ast}(f)e^{-j2\pi{f}{T}}e^{-j2\pi{f}{t}}df=K\cdot{g(T-t)}\nonumber
+    \end{equation}
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Why Call It ``Matched Filter''?}
+
+    \begin{itemize}
+        \item We convolve the time-flipped and time-shifted version of the transmitted pulse with the transmitted pulse itself
+        \item We are trying to match the pulses$\rightarrow$SNR maximizing!!
+        \item This filter can be implemented using a {\it tapped delay line}
+    \end{itemize}
+
+
+}
+
+
+\frame
+{
+  \frametitle{An Example -- Matching $h(t)$ with $g(t)$}
+
+
+  \begin{itemize}
+     \item Suppose we have a signal $g(t)$~$\rightarrow$~What is $h(t)$?
+     \begin{itemize}
+        \item Solve $h(t)=g(T-t)$
+     \end{itemize}
+     \item What is the output of $h(t)$?
+     \begin{itemize}
+         \item When we convolve $g(t)$ with $h(t)$, we get a triangular pulse
+     \end{itemize}
+  \end{itemize}
+
+}
+
+
+\frame
+{
+  \frametitle{Matched Filter Realization Schematic}
+
+\begin{itemize}
+ \item How does this look like?
+\end{itemize}
+
+}
+
+
+
+\end{document}

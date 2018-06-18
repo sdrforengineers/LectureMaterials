@@ -1,0 +1,177 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 05: PSD \& LTI Systems}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{3.6}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Frequency Domain Perspective}
+
+    \begin{itemize}
+        \item It is sometimes more convenient to study a communication system in the frequency domain rather than the time domain
+        \begin{itemize}
+            \item Mathematical analysis is more tractable
+            \item Operations such as convolution are transformed into simple multiplications
+        \end{itemize}
+        \item Physically it makes sense to study wireless transmissions in the frequency domain
+        \begin{itemize}
+            \item Digital communications is the transferral of data based on changes of electromagnetic wave characteristics such as frequency, amplitude, and phase
+        \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Fourier Transform}
+
+    \begin{itemize}
+        \item Mathematical relationship between a time domain waveform and weighted sum of sinusoidal components that constitute it, i.e., frequency domain representation
+        \item Translating between time and frequency domains is achieved using the Fourier transform and inverse Fourier transform:
+            \begin{equation}
+                  H(f)=\int_{-\infty}^{\infty}h(t)e^{-j2\pi{f}{t}}dt
+            \end{equation}
+            \begin{equation}
+                  h(t)=\int_{-\infty}^{\infty}H(f)e^{j2\pi{f}{t}}df
+            \end{equation}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Einstein-Wiener-Khinchin Theorem}
+
+    \begin{itemize}
+        \item In particular, we are interested in the {\it power spectral density} (PSD) of a signal, which is related to the autocorrelation function via the {\it Einstein-Wiener-Khintchine} (EWK) Relations:
+            \begin{equation}
+                  S_X(f)=\int_{-\infty}^{\infty}R_X(\tau)e^{-j2\pi{f}{\tau}}d\tau
+            \end{equation}
+            \begin{equation}                 
+                  R_X(\tau)=\int_{-\infty}^{\infty}S_X(f)e^{j2\pi{f}{\tau}}df
+            \end{equation} 
+        \item Relating the PSD between input $x(t)$ and output $y(t)$ of a system $h(t)$, we have the following very important result:
+            \begin{equation}
+                  S_Y(f)=|H(f)|^2S_X(f)
+            \end{equation}                
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Impulse Train Model}
+
+    \begin{itemize}
+        \item Signal analysis and knowledge of the input PSD can help determine the output PSD of the transmitter 
+        \begin{itemize}
+            \item Determine the autocorrelation function of $B_n$ from $I_n$ and then apply EWK relations
+        \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{PSD Properties}
+  
+  \begin{itemize}
+    \item Zero frequency scenario:
+    \begin{equation}
+        S_X(0)=\int_{-\infty}^{\infty}R_X(\tau)d\tau\nonumber
+    \end{equation}
+    \item Mean-squared value:
+    \begin{equation}
+        E\{x^2(t)\}=\int_{-\infty}^{\infty}S_X(f)df\nonumber
+    \end{equation}
+    \item Non-negative PSD: $S_X(f)\ge{0},~\forall{f}$
+    \item Real-valued process: $S_X(-f)=S_X(f)$
+    \item Normalized PSD associated with a PDF:
+    \begin{equation}
+        p_X(f)=\frac{S_X(f)}{\int_{-\infty}^{\infty}S_X(f)df}\nonumber
+    \end{equation}
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}[fragile]{PSD Example}
+
+  \begin{itemize}
+    \item Find $S_X(f)$ of the following random process:
+    \begin{equation}
+        x(t)=A\cos(2\pi{f_c}t+\Theta),\nonumber
+    \end{equation}
+    where $\Theta$ is uniformly distributed over the interval $[-\pi,\pi]$.
+    \item First solve for $R_X(\tau)$ by using:
+    \begin{equation}
+        R_X(\tau)=E\{x(t+\tau)x(t)\}=\frac{1}{2}A^2\cos(2\pi{f_c}\tau)\nonumber
+    \end{equation}
+    \item Then solve for the PSD using EWK relations:
+    \begin{equation}
+    \begin{split}
+        S_X(f)&=\int_{-\infty}^{\infty}R_X(\tau)e^{-j2\pi{f}\tau}d\tau=\int_{-\infty}^{\infty}\frac{1}{2}A^2\cos(2\pi{f_c}\tau)e^{-j2\pi{f}\tau}d\tau\\
+        &=\int_{-\infty}^{\infty}\frac{1}{4}A^2\left(e^{j2\pi{f_c}\tau}+e^{-j2\pi{f_c}\tau}\right)e^{-j2\pi{f}\tau}d\tau\\
+        &=\frac{A^2}{4}(\delta(f-f_c)+\delta(f+f_c))\nonumber
+    \end{split}
+    \end{equation}
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}[fragile]{Identifying PSD Features}
+
+    \begin{itemize}
+        \item PSD characteristics can reveal a substantial amount of info regarding a signal
+        \begin{itemize}
+            \item Modulation format
+            \item Pulse shape filtering
+            \item Transmission bandwidth
+        \end{itemize}
+        \item Time-varying behavior indicates network traffic levels
+        \item PSD shape can uniquely identify specific wireless standards
+    \end{itemize}
+
+\end{frame}
+
+
+
+
+
+
+\end{document}

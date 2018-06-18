@@ -1,0 +1,177 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 02: SDR Architectures}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{1.5-1.6}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Microelectronics Evolution is Key!}
+  \begin{itemize}
+    \item Rapid evolution of microelectronics over the past several decades
+    \begin{itemize}
+        \item {\bf Moore's Law} defines the long-term trend of the number of transistors accommodated on an integrated circuit
+        \item Doubling number of transistors per integrated circuit approximately every two years
+        \item Affects processing speed and memory
+    \end{itemize}
+    \item Microelectronics industry has significantly influenced digital communication systems sector
+    \begin{itemize}
+        \item Digital communication transceivers are becoming more {\it versatile}, {\it powerful}, and {\it portable}
+    \end{itemize}
+    \item Microelectronics advancements have given rise to {\bf software-defined radio} (SDR) technology
+    \begin{itemize}
+        \item Baseband radio functions can be {\it entirely} implemented in digital logic and software
+    \end{itemize}
+  \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Types of Microelectronics for SDR Implementation}
+  \begin{itemize}
+    \item General Purpose Microprocessor
+    \begin{itemize}
+        \item Very flexible in terms of reconfigurability
+        \item Easy to implement new digital communication modules
+        \item Not specialized for mathematical computations
+        \item Potentially power inefficient
+    \end{itemize}
+    \item Digital Signal Processor (DSP)
+    \begin{itemize}
+        \item Specialized for performing mathematical computations
+        \item Easy to implement new digital communication modules
+        \item Potentially slow for computationally expensive processes
+        \item Can be power efficient (e.g., used in cellular telephones)
+    \end{itemize}
+    \item Field Programmable Gate Array (FPGA)
+    \begin{itemize}
+        \item Computationally powerful
+        \item Power inefficient
+        \item Not flexible nor easy to implement new modules
+    \end{itemize}
+  \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{SDR Definition}
+  \begin{itemize}
+    \item A class of reconfigurable/reprogrammable radios whose physical layer characteristics can be significantly modified via software changes
+    \begin{itemize}
+        \item Capable of implementing different functions at different times on the same platform
+        \item Defines in software baseband radio features, e.g., modulation, error correction coding
+        \item Possesses some software control over RF front-end operations, e.g., transmission carrier frequency
+    \end{itemize}
+    \item Baseband radio functionality stored in memory
+    \begin{itemize}
+        \item Different types of modulation, error correction coding, and other functional blocks are available to the SDR platform
+        \item Functional blocks can potentially be changed in real-time
+    \end{itemize}
+    \item Operating parameters of functional blocks can be adjusted either by human operator or automated process
+  \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\frame
+{
+  \frametitle{SDR Key Features\footnote{\tiny From {\it Software Radio: A Modern Approach to Radio Engineering} by Jeffrey H. Reed (Prentice Hall, 2002).}}
+  \begin{itemize}
+    \item {\bf Multifunctionality} -- Possessing the ability to support multiple types of radio functions using the same digital communication system platform
+    \item {\bf Global Mobility} -- Transparent operation with different communication networks located in different parts of the world, i.e., not confined to just one standard
+    \item {\bf Compactness and Power Efficiency} -- Many communication standards can be supported with just one SDR platform
+    \item {\bf Ease of Manufacturing} -- Baseband functions a software problem, not a hardware problem
+    \item {\bf Ease of Upgrading} -- Firmware updates can be performed on SDR platform to enable functionality with latest communication standards
+  \end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\frame
+{
+  \frametitle{Digital Communication Transceiver -- Revisted}
+
+  \begin{itemize}
+   \item So where do we draw the line between the analog and digital domains in a communication system?
+  \end{itemize}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{History of SDR Development}
+  \begin{itemize}
+    \item  ``Software-defined radio'' first coined by Joseph Mitola in 1991 although SDR technology was available since the 1970s
+    \item First publicly funded SDR development initiative was {\it SpeakEasy I/II} by the U.S. military
+    \begin{itemize}
+        \item Employed programmable microprocessors for implementing more than ten military communication standards
+        \item Transmission carrier frequencies ranged from 2~MHz to 2~GHz
+        \item Allowed for upgrades of new functional blocks, such as modulation schemes and coding schemes
+        \item SpeakEasy II was the first SDR platform to involve FPGA modules for implementing digital baseband functionality
+        \item Physical size of prototype fit in the back of a truck
+        \item Read ``SPEAKeasy, the Military Software Radio'' by Upmal and Lackey in {\it IEEE Communications Magazine} (IEEE Press, 1995)
+    \end{itemize}
+  \end{itemize}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\end{document}

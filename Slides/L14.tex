@@ -1,0 +1,144 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 14: Error Vector Magnitude Measurement, Phase Ambiguity}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{7.2.4} \& \textsection{7.3}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Error Vector Magnitude Measurement}
+
+    \begin{itemize}
+        \item EVM provides useful measure of phase noise in recovered signal
+        \begin{itemize}
+         \item Helps understand algorithmic performance of Systems
+         \item Measures residual error of constellation with respect to reference position
+        \end{itemize}
+        \item Following mathematical expression used to calculate EVM in percent RMS:
+        \begin{equation}
+         \mathrm{EVM}_{\mathrm{RMS}}=100\cdot\left(\sqrt{\sum\limits_{k=0}^{N-1}e_{\mathrm{const}}(k)}\sum\limits_{k=0}^{N-1}((\Re(\bar{y}(k)))^2+(\Im(\bar{y}(k)))^2)\right)
+        \end{equation}
+	and:
+	\begin{equation}
+	 e_{\mathrm{const}}(k)=(\Re(y(k))-\Re(\bar{y}(k)))^2+(\Im(y(k))-\Im(\bar{y}(k)))^2
+	\end{equation}
+	where $\bar{y}(k)$ is the reference symbol for $y(k)$
+    \end{itemize}
+
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Error Vector Magnitude Measurement}
+  
+  \begin{itemize}
+   \item EVM is a measure of dispersiveness of received signal $\rightarrow$ Lower EVM is better
+   \item Sometimes EVM is represented in decibels:
+   \begin{equation}
+    \mathrm{EVM}_{\mathrm{dB}}=20\log_{10}\left(\frac{\mathrm{EVM}_{\mathrm{RMS}}}{100}\right)
+   \end{equation}
+  \end{itemize}
+
+  
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Phase Ambiguity}
+  
+  \begin{itemize}
+   \item Occurs when FFC synchronizer is blind to true orientation of transmitted signal
+   \item Symmetric modulation schemes may have a number of convergent orientations for its signal constellation 
+   \item There exists several approaches to help achieve the correct signal constellation] orientation
+   \begin{itemize}
+    \item Codewords
+    \item Differential Encoding
+    \item Equalizers
+   \end{itemize}
+  \end{itemize}
+
+  
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Differential Encoding}
+  
+  \begin{itemize}
+   \item To correct for phase ambiguity, differentially encode the source bits
+   \begin{itemize}
+    \item Makes true data dependent on difference between successive bits instead of just the received bits themselves
+   \end{itemize}
+    \item Encoding performed using modulo-2 addition:
+    \begin{equation}
+     b_t(n)=b_t(n-1)\oplus{b(n)}
+    \end{equation}
+    while decoding is performed using the following expression:
+    \begin{equation}
+     b(n)=b_t(n)\oplus{b_t(n-1)}
+    \end{equation}
+    where $b_t(n)$ are the transmitted bits while $b(n)$ are the untransmitted bits
+  \end{itemize}
+
+  
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\end{document}

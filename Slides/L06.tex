@@ -1,0 +1,267 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 06: Fundamentals of Data Transmission}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.1}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Anatomy of a Typical Digital Communication System}
+
+  \begin{itemize}
+   \item Let us revisit the generic representation of a digital communication transceiver
+  \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Sending Messages}
+
+  \begin{itemize}
+  \item Digital communications involves the transmission of a message $m(t)$ and producing a reconstructed version of the message $\hat{m}(t)$ at the output of the receiver
+  \begin{itemize}
+    \item Our goal is to have $P(\hat{m}(t)\neq m(t))$ as small as needed for a particular application
+    \item Probability of Error: $Pe=P(\hat{m}(t)\neq m(t))$
+  \end{itemize}
+  \item Various data applications possess different $P_e$ requirements
+  \begin{itemize}
+    \item Voice: $Pe\sim{10^{-3}}$
+    \item Data: $Pe\sim{10^{-5}-10^{-6}}$
+    \item Fiber optics: $Pe\sim{10^{-9}}$
+  \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Purpose of Source Encoder}
+
+  \begin{itemize}
+    \item Given $\underline{u}=\mathsf{sequence~of~source~symbols}$ and $\underline{v}=\mathsf{sequence~of~source~encoded~symbols}$:
+    \begin{itemize}
+        \item We should have $v_{i}\in\underline{v}$ as close to random as possible
+        \item Components of $\underline{v}$ are uncorrelated, i.e., unrelated
+    \end{itemize}
+    \item Why do we perform source encoding?
+    \begin{itemize}
+        \item No redundancy in $v_{i} \in \underline{v}$
+        \item Do not want to waste channel resources (e.g: power, bandwidth) in the transmission of ``predictable symbols''
+    \end{itemize}
+    \item Source encoder removes redundant information from the source symbols in order to realize efficient transmission
+    \begin{itemize}
+        \item Note that the source needs to be {\it digital}
+    \end{itemize}
+\end{itemize}
+}
+\frame
+{
+  \frametitle{A Source Encoding Example}
+
+  \begin{itemize}
+    \item Analog TV uses 6~MHz bands to transmit every channel
+    \item Digital TV employing source encoding
+    \begin{itemize}
+        \item This can be performed since information is digitally represented
+        \item Eight digitally encoded TV channels can be fit in one 6~MHz band
+    \end{itemize}
+  \end{itemize}
+
+}
+
+
+\frame
+{
+  \frametitle{Why Perform Channel Coding?}
+  \begin{itemize}
+    \item Channel coding is designed to correct channel transmission errors
+    \begin{itemize}
+        \item Achieved via {\it controlled} introduction of redundancy
+        \item How is this different than the redundancy removed during source encoding?
+    \end{itemize}
+    \item Each vector of source encoded outputs, $v_{l}$, $l=1,2,...,2^k$, are assigned a unique {\it codeword}
+    \begin{itemize}
+        \item Take $v_{l}=(101010\ldots)$ and assign unique codeword ${c_l}\in{\mathbb{C}}$ where $\mathbb{C}$ is a {\it codebook}
+    \end{itemize}
+    \item We have added $N-K=r$ controlled number of bits to the channel encoding process
+    \item The {\it code rate} of a communications system is equal to the ratio of the number of information bits to the size of the codeword, i.e., Code~Rate=$k/N$
+  \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Hamming Distance}
+
+    \begin{itemize}
+       \item The {\it Hamming Distance} $d_H(c_i,c_j)$ between two codewords say ${c_{i}}$ and ${c_{j}}$ is equal to the number of components in which ${c_{i}}$ and ${c_{j}}$ are different
+        \item We often are looking for the minimum Hamming Distances between codewords, i.e.:
+        \begin{equation}
+            d_{H,\min}=\min\limits_{c_i,c_j\in\mathbb{C},~i\neq{j}}{d_H(c_i,c_j)}
+        \end{equation}
+        \item Our goal is to maximize the minimum Hamming Distance in a given codebook
+        \item For example:
+        \begin{itemize}
+            \item $\{101,010\}\rightarrow{d_{H,min}}=3\rightarrow$~GOOD!
+            \item $\{111,101\}\rightarrow{d_{H,min}}=1\rightarrow$~POOR!
+        \end{itemize}
+    \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Decoding Spheres}
+
+  \begin{itemize}
+    \item We can use {\it decoding spheres} (also known as {\it Hamming spheres}) to make decisions on received information
+    \item Decoding spheres should not overlap $\rightarrow{d_{H,\min}}=2t+1$
+  \end{itemize}
+
+}
+\frame
+{
+  \frametitle{A Channel Encoding Example}
+
+    \begin{itemize}
+        \item Example: A rate $1/3$ repetition code with no source encoding would look like:
+        \begin{equation}
+        \begin{split}
+            1\rightarrow{111}&={c_{1}}~(\mathsf{1st~codeword})\\
+            0\rightarrow{000}&={c_{2}}~(\mathsf{2nd~codeword})\\
+            \therefore{C}&=\{000,111\}
+        \end{split}
+        \end{equation}
+       \item What are the Hamming Distances for the following codeword pairs?
+            \begin{itemize}
+            \item $d_{H}$(111,000)=3
+            \item $d_{H}$(111,101)=1
+            \end{itemize}
+    \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Shannon's Channel Coding Theorem (1948)}
+
+  \begin{itemize}
+  \item Consider a channel with capacity $C$ and we transmit at a fixed code rate $K/N$ which is equal to $R_c$ (a constant)
+  \begin{itemize}
+    \item If we increase $N$, we must increase $K$ to keep $R_c$ equal to a constant
+  \end{itemize}
+  \item There exists a code such that for $R_c=K/N<C$ as $N\rightarrow\infty$, we have $P_e\rightarrow{0}$
+  \begin{itemize}
+    \item Conversely, for $R_c=K/N \geq C$, no such code exists
+  \end{itemize}
+  \item Hence, $C$ is the limit in rate for reliable communications, i.e., $C$ is the {\bf absolute limit} that you cannot go any faster than this amount without causing errors
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Shannon's Channel Capacity}
+
+  \begin{itemize}
+  \item {\it Reliability} in digital communications is usually expressed as the Probability of Bit Error measured at the output of the receiver
+  \item It would be nice to know what this capacity is given the transmission bandwidth, $B$, the received signal-to-noise ratio (SNR)
+  \begin{itemize}
+  \item Shannon derived the {\it information capacity of the channel} to be equal to:
+  \begin{equation}
+    C=B\log_{2}(1+SNR)\qquad\mathsf{[b/s]}
+  \end{equation}
+  \item The information capacity tells us the achievable data rate, but it does not tell us how to build a transceiver to achieve this
+  \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Why Is This Important?}
+
+  \begin{itemize}
+  \item The information capacity of the channel is useful for the following reasons:
+  \begin{itemize}
+  \item This expression provides us with a bound on the achievable data rate given bandwidth $B$ and received SNR, employed in the ratio $\eta = R/C$, where $R$ is the signalling rate and $C$ is the channel capacity
+  \begin{itemize}
+  \item As $\eta\rightarrow{1}$, the system becomes more efficient
+  \end{itemize}
+  \item The capacity expression provides us with a basis for trade-off analysis between $B$ and SNR
+  \item The capacity expression can be used for comparing the noise performance of one modulated scheme versus another
+  \end{itemize}
+  \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Additive White Gaussian Noise Channel}
+
+  \begin{itemize}
+    \item In many instances, we model the communications channel as an additive white Gaussian noise (AWGN) channel
+    \item The white Gaussian noise has an autocorrelation $R_n(\tau)=R_n(-\tau)=E\{n(t)n(t+\tau)\}=(N_0/2)\delta(t)$
+  \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Filtered AWGN Channel}
+
+  \begin{itemize}
+    \item We know that the power spectral density of white Gaussian noise is equal to:
+    \begin{equation}
+        S_N(f)=\mathbb{F}\{R_n(\tau)\}=\int\limits_{-\infty}^{\infty}R_n(\tau)e^{-j2\pi{f}\tau}d\tau=\frac{N_0}{2}
+    \end{equation}
+    \item When this noise is passed through an LTI system with impulse response $h(t)$, the output power spectral density will be defined by the Einstein-Wiener-Khinchin (EWK) Theorem, namely:
+    \begin{equation}
+        S_Y(f)=|H(f)|^2S_N(f)
+    \end{equation}
+  \end{itemize}
+
+}
+
+
+
+
+\end{document}

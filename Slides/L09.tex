@@ -1,0 +1,313 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 09: Phase Shift Keying}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.2.4}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{BPSK Modulation}
+
+    \begin{itemize}
+        \item Modulation Rule:
+        \begin{equation}
+        \begin{split}
+            ``1"\rightarrow{s_{1}(t)}&=A\cdot\cos(\omega_{c}t+\theta)\\
+            ``0"\rightarrow{s_{2}(t)}&=-A\cdot\cos(\omega_{c}t+\theta)\\
+            &=A\cdot\cos(\omega_{c}(t)+\theta+\pi)\\
+            &=-s_{1}(t)
+        \end{split}
+        \end{equation}
+        \item As we have seen in the past few slides, determining $\varepsilon_{P}$ is important
+        \begin{itemize}
+        \item We will now show that $\varepsilon_{p}=4$ is the {\bf optimum}
+        \end{itemize}
+    \end{itemize}
+
+
+}
+
+\frame
+{
+  \frametitle{Solving for $\varepsilon_{p,\mathsf{BPSK}}$: Compute $d_{\min}^2$}
+
+   \begin{itemize}
+    \item Employ the definition for $d_{min}^2$ and solve
+        \begin{equation}
+        \begin{split}
+            d_{\min}^2&=\int\limits_{0}^{T}(s_{1}(t)-s_{2}(t))^2{dt}\\
+            &=4A^2\int\limits_{0}^{T}\cos^2(\omega_ct+\theta)dt\\
+            &=\frac{4A^2T}{2}+\frac{4A^2}{2}\int\limits_{0}^{T}\cos(2\omega_ct+2\theta)dt\\
+            &=2A^2T\rightarrow\mathsf{double~frequency~term~eliminated}\nonumber
+        \end{split}
+        \end{equation}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Solving for $\varepsilon_{p,\mathsf{BPSK}}$: Compute $\bar{E}_{b}$}
+
+   \begin{itemize}
+   \item Employ the definition for $\bar{E}_{b}$ and solve
+    \begin{equation}
+    \begin{split}
+        E_{s_1}&=\int\limits_0^Ts_1^2(t)dt=A^2\int\limits_0^T\cos^2(\omega_ct+\theta)dt\\
+        &=\frac{A^2T}{2}+\frac{A^2}{2}\int\limits_{0}^{T}\cos(2\omega_ct+2\theta)dt\\
+        &=\frac{A^2T}{2}\rightarrow\mathsf{double~frequency~term~eliminated}\\
+        E_{s_2}&=\frac{A^2T}{2}\quad\therefore\quad\bar{E}_b=P(0)\cdot{E_{s_2}}+P(1)\cdot{E_{s_1}}=\frac{A^2T}{2}\nonumber
+    \end{split}
+    \end{equation}
+    \end{itemize}
+}
+
+
+\frame
+{
+  \frametitle{Solving for $\varepsilon_{p,\mathsf{BPSK}}$: The Finale}
+
+    \begin{itemize}
+        \item Applying the definition for the power efficiency yields:
+        \begin{equation}
+            \varepsilon_{p,\mathsf{BPSK}} = \frac{d_{\min}^2}{\bar{E}_{b}}=4
+        \end{equation}
+        \item This is suppose to be the largest possible value for $\varepsilon_{p}$ for a modulation scheme employing all possible signal representations, i.e., $M=2^b$ waveforms
+    \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Alternative Approach to Computing $d_{\min}^2$}
+
+  \begin{itemize}
+        \item Another way to compute $d_{\min}^2$ is to use the concept of {\it correlation} such that:
+        \begin{equation}
+            d_{\min}^2=\int\limits_{0}^{T}(s_2(t)-s_1(t))^2dt=E_{s_1}+E_{s_2}-2\rho_{12}
+        \end{equation}
+        where:
+        \begin{equation}
+            E_{s_i}=\int\limits_{0}^{T}s_i^2(t)dt\quad\mathsf{and}\quad\rho_{12}=\int\limits_{0}^{T}s_1(t)s_2(t)dt\nonumber
+        \end{equation}
+        \item In order to get a {\bf large} $\varepsilon_{p}$, we need to maximize $d_{\min}^2$, which means we want $\rho_{12}<0$
+        \begin{itemize}
+            \item $E_{s_1}=E_{s_2}=E=A^2T/2\rightarrow{d_{\min}^2}=2(E-\rho_{12})\rightarrow{\rho_{12}=-E}$
+        \end{itemize}
+  \end{itemize}
+
+}
+
+
+\frame
+{
+  \frametitle{An Example}
+
+    \begin{itemize}
+        \item Show that for the following signal waveforms:
+        \begin{equation}
+        \begin{split}
+            s_1(t)&=A\cdot\cos(\omega_ct+\theta)\\
+            s_2(t)&=0\nonumber
+        \end{split}
+        \end{equation}
+        the power efficiency is equal to $\varepsilon_{p}=2$
+        \begin{itemize}
+            \item This represents a 3~dB loss relative to BPSK!!
+            \item $\mathsf{Loss}=10\cdot\log_{10}\left(\frac{\varepsilon_{p,\mathsf{BPSK}}}{\varepsilon_{p,\mathsf{other}}}\right)$
+        \end{itemize}
+        \item Show that for the following signal waveforms:
+        \begin{equation}
+        \begin{split}
+            s_1(t)&=A\cdot\cos(\omega_ct+\theta)\\
+            s_2(t)&=A\cdot\sin(\omega_ct+\theta)\nonumber
+        \end{split}
+        \end{equation}
+        the power efficiency is equal to $\varepsilon_{p}=2$
+    \end{itemize}
+
+
+}
+
+\frame
+{
+  \frametitle{QPSK Modulation Format}
+
+    \begin{itemize}
+        \item So far we have seen modulation schemes that consist of just one of two waveforms
+        \begin{itemize}
+            \item We will now expand our signal constellation repertoire to four distinct waveforms per modulation scheme
+        \end{itemize}
+        \item In QPSK modulation, a signal waveform possesses the following representation:
+        \begin{equation}
+        \begin{split}
+            {s_{i}(t)}=&\pm{A}\cdot\cos(\omega_{c}t+\theta)\\
+            &\pm{A}\cdot\sin(\omega_{c}t+\theta)
+        \end{split}
+        \end{equation}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Computing $\varepsilon_{p,\mathsf{QPSK}}$}
+
+    \begin{itemize}
+       \item Solving for $d_{\min}^2$, we obtain:
+        \begin{equation}
+            d_{\min}^2=\int\limits_{0}^{T}\Delta{s^2(t)}dt=2A^2T
+        \end{equation}
+       \item To find $\bar{E}_b$, we need to average over all the signals, which is equal to (assuming $E_{s_1}=E_{s_2}=E_{s_3}=E_{s_4}=A^2T$):
+         \begin{equation}
+            \bar{E}_b=\frac{(E_{s_1}+E_{s_2}+E_{s_3}+E_{s_4})/4}{\log_2(M)}=\frac{A^2T}{2}
+         \end{equation}
+       \item Solving for the power efficiency, we get:
+       \begin{equation}
+        \varepsilon_{p,\mathsf{QPSK}}=\frac{d_{\min}^2}{\bar{E}_b}=4
+       \end{equation}
+       which is the same as BPSK {\bf but} with 2 bits per symbol!!
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{MPSK Modulation Format}
+  
+  \begin{itemize}
+    \item Constant distance of signal constellation point to origin
+    \item Consists of $M$ equally spaced points on a circle
+    \item General expression for an $M$-ary PSK waveform:
+    \begin{equation}
+        s_i(t)=A\cdot\cos\left(\omega_ct+\frac{2\pi{i}}{M}\right),~\mathsf{for}~i=0,1,2,\ldots,M-1
+    \end{equation}
+    \item There are advantages and disadvantages with this modulation scheme
+    \begin{itemize}
+        \item As $M$ increases, the spacing between signal constellation points decreases $\rightarrow$ error robustness decreases
+        \item Having information encoded in the phase results in constant envelope modulation, which is:
+        \begin{itemize}
+            \item Good for non-linear power amplifiers
+            \item Robust to amplitude distortion channels
+        \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  
+}
+\frame
+{
+  \frametitle{Computing $\varepsilon_{p,\mathsf{M-PSK}}$}
+  
+  \begin{itemize}
+    \item Given $s_1(t)=A\cdot\cos(\omega_ct)$ and $s_2(t)=A\cdot\cos(\omega_ct+2\pi/M)$
+    \begin{itemize}
+        \item Calculate $d_{\min}^2=E_{s_1}+E_{s_2}-2\rho_{12}$ where:
+        \begin{equation}
+            E_{s_i}=\int\limits_0^Ts_i^2(t)dt=\frac{A^2T}{2},~\mathsf{for}~i=1,2\quad
+        \end{equation}
+        and:
+        \begin{equation}
+            \rho_{12}=\int\limits_0^Ts_1(t)s_2(t)dt=\frac{A^2T}{2}\cos\left(\frac{2\pi}{M}\right)
+        \end{equation}
+        which yields $d_{\min}^2=A^2T(1-\cos(\frac{2\pi}{M}))$
+    \end{itemize}
+  \end{itemize}
+  
+  
+}
+\frame
+{
+  \frametitle{Computing $\varepsilon_{p,\mathsf{M-PSK}}$}
+  
+  \begin{itemize}
+      \item Given $s_1(t)=A\cdot\cos(\omega_ct)$ and $s_2(t)=A\cdot\cos(\omega_ct+2\pi/M)$
+    \begin{itemize} 
+           \item The average bit energy $\bar{E}_b$ is equal to $\bar{E}_b=\frac{\bar{E}_s}{\log_{2}(M)}=\frac{\bar{E}_s}{b}$, where $\bar{E}_s=A^2T/2$
+        \item Using the definition for the power efficiency, we see that $\varepsilon_{p,\mathsf{M-PSK}}=2b(1-\cos(\frac{2\pi}{M}))=4b\sin^2(\frac{\pi}{2^b})$
+     \end{itemize}
+  \end{itemize}
+  
+  
+}
+
+\frame
+{
+  \frametitle{Overall Comparison of $\varepsilon_{p}$}
+
+    \begin{itemize}
+        \item To determine how much power efficiency we are losing relative to $\varepsilon_{p,\mathsf{QPSK}}$, we use $\delta\mathsf{SNR}=10\cdot\log_{10}(\frac{\varepsilon_{p,\mathsf{QPSK}}}{\varepsilon_{p,\mathsf{other}}})$
+    \end{itemize}
+    \begin{table}[h]
+    \caption{$\delta$SNR Values of Various Modulation Schemes.}
+    \begin{tabular}{ccccc}
+      \hline
+      $M$ & $b$ & $M$-ASK & $M$-PSK & $M$-QAM \\
+      \hline
+      2  & 1 &  0    &  0    & 0 \\
+      4  & 2 &  4    &  0    & 0 \\
+      8  & 3 &  8.45 &  3.5  & (??) \\
+      16 & 4 & 13.27 &  8.17 & 4.0 \\
+      32 & 5 & 18.34 & 13.41 & (??) \\
+      64 & 6 & 24.4  & 18.4  & 8.45 \\
+      \hline
+    \end{tabular}
+    \end{table}
+
+}
+\frame
+{
+  \frametitle{Observations of $\varepsilon_{p}$}
+
+    \begin{itemize}
+        \item Two dimensional modulation is better than one dimensional modulation
+        \item All modulation schemes studied are linear modulation schemes$\rightarrow$similar receiver complexity
+    \end{itemize}
+    
+}
+
+\end{document}

@@ -1,0 +1,136 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+%\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 19: Alternative Sequences}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{8.2.2}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Alternatives to Barker Sequence}
+
+    \begin{itemize}
+        \item Barker sequences possess minimal cross-correlation except at specific instances 
+        \item There exists two alternative sequences used in wireless implementations
+        \begin{itemize}
+         \item Zadoff-Chu Sequences
+         \item Golay Complementary Sequences
+        \end{itemize}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Zadoff-Chu Sequences}
+
+    \begin{itemize}
+        \item Created by Solomon Zadoff and David Chu 
+        \item Sequence numbers generated using the following expression:
+         \begin{equation}
+        \begin{split}
+            s_n=e^{-j\pi kn(n+1+2q)/L} 
+        \end{split}
+        \end{equation}
+        where $L$ is sequence length, $n$ is sequence index, $q$ is integer, and $k$ which is coprime with $L$
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Applications of Zandoff-Chu Sequences}
+    \begin{itemize}
+        \item Used for LTE synchronization and channel sounding 
+         \item Possess constant amplitude, zero circular auto-correlation, and low cross cross-correlation 
+        \item Extremely useful in multi-access environment with multiple user transmit signals
+    \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Golay Complementary Sequences (GCS)}
+
+    \begin{itemize}
+        \item Sequences of bipolar symbols with minimal autocorrelation properties
+        \item Similar to concept of Barker codes 
+        \item Sequences occur in complimentary pairs
+        
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Golay Complementary Sequences (GCS)}
+
+    \begin{itemize}
+        \item We typically denote the pairs as $G_{an}$ and $G_{bn}$ where $n$ is sequence length 
+        \item IEEE~802.11ad uses $Ga_{32}$,$Ga_{64}$ and $Gb_{64}$
+    \end{itemize}
+
+}
+\frame
+{
+  \frametitle{GCS Advantages}
+
+    \begin{itemize}
+       \item With BPSK performance is exceptional even with severe phase rotation  
+        \item Auto-correlation for sequence pairs can be performed in parallel 
+        \item Preamble in IEEE~802.11ad can provide signal information 
+    \end{itemize}
+
+}
+
+
+
+
+
+
+
+\end{document}

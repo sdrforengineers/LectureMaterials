@@ -1,0 +1,265 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Laboratory 0: Understanding SDR Hardware}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection~5.1-5.2}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{What Is A Communication System?}
+
+
+\centering
+Information Source\\
+$\downarrow$\\
+Conversion to EM Signal\\
+$\downarrow$\\
+Transmission Medium\\
+$\downarrow$\\
+Conversion from EM Signal\\
+$\downarrow$\\
+Information Sink
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{SDR Basic Ingredients}
+
+
+\begin{itemize}
+ \item \textbf{Analog RF section}: Antennas, RF filters, LNAs, attenuators, mixers
+ \item \textbf{Analog baseband section}: Analog filters, ADCs, DACs
+ \item \textbf{Digital signal processing section}: FPGAs, DSPs, ARMs, general purpose microprocessors
+\end{itemize}
+
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Transmit \& Receive Specifications}
+
+
+\begin{itemize}
+ \item 300 - 3800~GHz carrier frequency range
+ \item 200 - 20000~kHz channel bandwidth
+ \item 65.1 - 61440~kSPS
+ \item 2.4~Hz LO step size with 5~Hz sample rate step size
+ \item 12-bit DACs
+\end{itemize}
+
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Linux Industrial Input/Output (IIO)}
+
+
+\begin{itemize}
+ \item \textit{Linux kernel IIO driver} runs inside the Linux kernel of the ARM on the Pluto SDR
+ \item \textit{libiio} userspace library is used for accessing local and remote IIO devices and is located on both Pluto SDR ARM and host machine
+ \item \textit{IIO Daemon} (iiod) allows for remote connection to IIO clients such as ARM inside Pluto SDR
+\end{itemize}
+\vspace*{5mm}
+$\rightarrow$ How does this IIO framework look like?
+
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{MATLAB IIO Client}
+
+\begin{itemize}
+ \item We can use MATLAB as an IIO client on the host machine
+ \item This is achieved using the following system objects:
+ \begin{itemize}
+  \item \textit{comm.SDRRxPluto}: Pluto SDR receiver system object
+  \item \textit{comm.SDRTxPluto}: Pluto SDR transmitter system object
+ \end{itemize}
+ \item Instantiating system objects:
+\end{itemize}
+\begin{figure}
+\centering
+\begin{minipage}[framed]{0.9\textwidth}
+\begin{lstlisting}
+rx = sdrrx('Pluto');
+tx = sdrtx('Pluto');
+\end{lstlisting}
+\end{minipage}
+\captionsetup{labelformat=empty}
+\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{\texttt{rx} Specifications}
+
+\begin{figure}
+\centering
+\begin{minipage}[framed]{0.9\textwidth}
+\begin{lstlisting}
+>> rx = sdrrx('Pluto')
+
+rx =
+
+  comm.SDRRxPluto with properties:
+
+                DeviceName: 'Pluto'
+                   RadioID: 'usb:0'
+           CenterFrequency: 2.4000e+09
+                GainSource: 'AGC Slow Attack'
+            ChannelMapping: 1
+        BasebandSampleRate: 1000000
+            OutputDataType: 'int16'
+           SamplesPerFrame: 3660
+    ShowAdvancedProperties: false
+\end{lstlisting}
+\end{minipage}
+\captionsetup{labelformat=empty}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{\texttt{rx} Specifications}
+
+\begin{itemize}
+ \item \textit{RadioID}: Related to interface number of connected device, either via USB or Ethernet/IP address
+ \item \textit{CenterFrequency}: Operating center frequency of radio in hertz 
+ \item \textit{BasebandSampleRate}: Baseband sampling rate of I/Q chain
+ \item \textit{GainSource}: Three types are available
+ \begin{itemize}
+  \item Manual
+  \item AGC Slow Attack
+  \item AGC Fast Attack
+ \end{itemize}
+ \item \textit{ChannelMapping}: Set this value to 1 for Pluto SDR
+ \item \textit{OutputDataType}: MATLAB can only receive 16-bit complex integers
+ \item \textit{SamplesPerFrame}: Defines number of samples in buffer which is passed from MATLAB to iiod
+\end{itemize}
+
+ 
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Radio I/O Basics: Collecting Data}
+
+\begin{figure}
+\centering
+\begin{minipage}[framed]{0.9\textwidth}
+\begin{lstlisting}
+% Perform data collection then offline processing
+data = zeros(frameSize, framesToCollect);
+for frame = 1:framesToCollect  
+    [d,valid,of] = rx();
+    if ~valid
+        warning('Data invalid')
+    elseif of
+        warning('Overflow occurred')
+    else
+        data(:,frame) = d;
+    end
+end
+% Process new live data
+sa1 = dsp.SpectrumAnalyzer;
+for frame = 1:framesToCollect
+    sa1(data(:,frame)); % Algorithm processing
+end
+\end{lstlisting}
+\end{minipage}
+\captionsetup{labelformat=empty}
+\end{figure}
+
+ 
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Radio I/O Basics: Continuous Transmission}
+
+\begin{figure}
+\centering
+\begin{minipage}[framed]{0.9\textwidth}
+\begin{lstlisting}
+% Transmit all zeros
+tx = sdrtx('Pluto');
+fs = 1e6; fc = 1e4; s = 2*pi*fs*fc*(1:2^14).';
+wave = complex(cos(s),sin(s));
+tx.transmitRepeat(wave);
+\end{lstlisting}
+\end{minipage}
+\captionsetup{labelformat=empty}
+\end{figure}
+\vspace*{3mm}
+Why is this important?\\
+$\rightarrow$~When the Pluto SDR is ``on'', it is still transmitting even if the user is not sending anything at that moment
+
+ 
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}

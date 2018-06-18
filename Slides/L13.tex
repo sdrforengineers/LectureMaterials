@@ -1,0 +1,151 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+\usepackage{amsmath}
+
+\DeclareMathOperator{\sinc}{sinc}
+\DeclareMathOperator{\sgn}{sgn}
+
+\title{Lecture 13: Fine Frequency Correction}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{7.2.2}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{FFC Purpose}
+
+    \begin{itemize}
+        \item Once Coarse Frequency Correction (CFC) is performed, Fine Frequency Correction (FFC) is applied to identify exact location of carrier frequency
+	\begin{itemize}
+	 \item Some digital signals might be susceptible to small amounts of carrier frequency offset $\rightarrow$ Might cause phase rotation in signal constellation
+	 \item Rate of rotate equal to frequency offset
+	\end{itemize}
+        \item Unlike CFC, which uses feedforward approach, FFC uses feedback approach to find carrier frequency
+        \begin{itemize}
+         \item Need to implement digital phase locked loop (DPLL)
+        \end{itemize}
+    \end{itemize}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{FFC DPLL Overview}
+
+\centering
+$x(t)$\\
+$\downarrow$\\
+$\phi(n)$ $\rightarrow$ Phase Rotator $\rightarrow$ $y(n)$\\
+$\downarrow$\\
+Phase Error Detector $\rightarrow$ $e(n)$\\
+$\downarrow$\\
+Loop Filter $\rightarrow$ $f(n)$\\
+$\downarrow$\\
+Direct Digital Synthesizer $\rightarrow$ $\phi(n)$\\
+  
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{FFC DPLL Variables}
+ 
+ \begin{itemize}
+  \item $x(t)$: Input signal to DPLL that possesses some degree of carrier offset
+  \item $y(n)$: Corrected signal with respect to carrier offset
+  \item $e(n)$: Error signal produced by phase error detector (PED), defined by:
+  \begin{equation}
+   e(n)=\sgn(\Re(y(n)))\cdot\Im(y(n))-\sgn(\Im(y(n)))\cdot\Re(y(n))
+  \end{equation}
+  which is essentially the difference between the real and imaginary components of $y(n)$ and will only be zero when $\Re(y(n))=\Im(y(n))$
+  \item $f(n)$: Output of loop filter, which governs dynamics of DPLL by determining the operational frequency, lock time, and responsiveness (also smooths out error)
+  \item $\phi(n)$: The correction signal that is applied to input signal $x(t)$ to yield compensated output signal $y(n)$
+ \end{itemize}
+
+ 
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Loop Filter Design}
+
+  \begin{itemize}
+   \item Once we have $e[n]$, the next step is to apply the loop filter
+   \item Calculations of gain values $(G_1,G_2)$ employ the following expressions:
+\begin{align}
+ \theta=\frac{B_{\mathrm{Loop}}}{M(\psi+0.25/\psi)},\quad\Delta=1+2\psi\theta+\psi^2\\
+ G_1=\frac{4\psi\theta/\Delta}{MK},\quad{G_2}=\frac{(4/M)\theta^2/\Delta}{MK}
+\end{align}
+such that $B_{\mathrm{Loop}}$ is loop filter bandwidth, $\psi$ is preferred dampening factor, $M$ is number of samples per second, and $K$ is detector gain
+\item: Helpful Hint: When designing a loop filter, start off with $B_{\mathrm{Loop}}=0.01$ and $\psi=1$ since it is easier to work with an overdampened system
+  \end{itemize}
+ 
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\frame
+{
+  \frametitle{Direct Digital Synthesizer}
+
+  \begin{itemize}
+   \item The DDC is equivalent to an integrator, namely:
+\begin{equation}
+ F(z)=G_3\frac{z^{-1}}{1-z^{-1}}
+\end{equation}
+\end{itemize}
+
+}
+
+\end{document}

@@ -1,0 +1,156 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+%\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 20: Channel Coding}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{8.4}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Channel Coding}
+
+    \begin{itemize}
+        \item Data potentially corrupted while communicated across wireless link
+        \item Channel coding used to make process robust 
+        \item Several techniques used to mitigate errors introduced by wireless link:
+        \begin{itemize}
+        \item Repetition coding
+        \item Interleaving
+        \item Encoding
+        \end{itemize}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Repetition Coding  }
+
+At Transmitter:
+\begin{center}
+ Binary Data of Original Information Sequence\\
+$\downarrow$\\
+Repetition Coding Applied with Repetition Rate $R$\\
+$\downarrow$\\
+Bits in Information Sequence Repeated $R$ Times
+\end{center}
+
+\vspace*{5mm}
+
+At Receiver:
+\begin{center}
+ Encoded Data Sequence Received\\
+$\downarrow$\\
+Majority Rule Decision Making Applied per $R$ Bits\\
+$\downarrow$\\
+Original Information Sequence Recovered
+\end{center}
+
+
+
+}
+
+\frame
+{
+  \frametitle{Repetition Coding Drawbacks}
+
+    \begin{itemize}
+        \item Repetition coding cannot prevent contiguous corrupted data block errors 
+        \begin{itemize}
+         \item Consider the following scenario:\\
+         \hspace{5ex}Suppose '101101' has to be transmitted\\
+         \hspace{5ex}If repetition factor $R=4$ output is '111100001111111100001111'\\
+         \hspace{5ex}However, with a block error output can be\\
+          \hspace{5ex}'11100--------1100001111'
+        \end{itemize}
+        \item \textit{Interleaving} can prevent this situation
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Interleaving}
+
+    \begin{itemize}
+        \item Binary data is reordered so that correlation between single bits is reduced 
+        \item Error gets dispersed across entire sequence minimizing impact
+        \item Consider the previous example again only this time with interleaving applied:\\
+         \hspace{5ex}Suppose '101101' has to be transmitted\\
+         \hspace{5ex}If interleaving in step of '4' reorder by vector index\\
+          \hspace{20ex}[1,5,9,....,2,6,10...]\\
+          \hspace{5ex}'11100001111111100001111'$\rightarrow$ '101101101101101101101101'\\
+          \item Consequently, impact of long string of errors has been reduced
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Block and Convolutional Interleaving Approaches}
+
+    \begin{itemize}
+        \item \textbf{Block Interleaving Approach}: Loaded Column wise, transmitted row wise  
+        \item One of the concerns is that significant delay is introduced
+        \item \textbf{Concolutional Interleaving Approach}: Sequence shifted to register bank with increasing buffer memory
+        \item Recombined via commutator and then transmitted $\rightarrow$ Smaller delay 
+    \end{itemize}
+
+}
+
+
+\frame
+{
+  \frametitle{Block and Convolutional Interleaving Approaches}
+
+Let's see how these implementations operate ...
+
+}
+
+
+\end{document}

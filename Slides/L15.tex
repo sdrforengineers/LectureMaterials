@@ -1,0 +1,248 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 15: Gram-Schmidt Orthogonalization}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.5}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{Orthonormal Basis Functions}
+
+    \begin{itemize}
+        \item Recall that $\{\phi_j(t)\}$ is an orthonormal set of functions on the time interval $[0,T]$ such that:
+        \begin{equation}
+            \int\limits_0^T\phi_i(t)\phi_j(t)dt=\left\{
+            \begin{array}{ll}
+              1 & i=j \\
+              0 & \mathsf{otherwise}
+            \end{array}
+            \right.\nonumber
+        \end{equation}
+        \item Furthermore, it is possible to represent a signal waveform $s_i(t)$ as the weighted sum of these orthonormal basis functions, i.e.:
+        \begin{equation}
+            s_i(t)=\sum\limits_{k=1}^{N}s_{ik}\phi_k(t)
+        \end{equation}
+        \item How do we determine the set of orthonormal basis functions $\{\phi_j(t)\}$?
+        \begin{itemize}
+            \item Use {\it Gram-Schmidt Orthogonalization Procedure}
+        \end{itemize}
+    \end{itemize}
+
+}
+
+
+\frame
+{
+  \frametitle{Orthonormal Basis Functions}
+
+    \begin{itemize}
+        \item A complete orthonormal set of basis functions is needed for a set of $M$ energy signals denoted by $s_1(t),\ldots,s_M(t)$
+            \item Choose $s_1(t)$ and normalize it:
+            \begin{equation}
+                \phi_1(t)=\frac{s_1(t)}{\sqrt{E_{s_1}}}\nonumber
+            \end{equation}
+            where $E_{s_1}$ is the energy of the signal $s_1(t)$
+            \begin{itemize}
+                \item We can express $s_1(t)$ as:
+                \begin{equation}
+                    s_1(t)=\sqrt{E_{s_1}}\phi_1(t)=s_{11}\phi_1(t)\nonumber
+                \end{equation}
+                where the coefficient $s_{11}=\sqrt{E_{s_1}}$ and $\phi_1(t)$ has unit energy as required
+            \end{itemize}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Setting Up $\phi_2(t)$}
+
+        \begin{itemize}
+            \item Now using the signal $s_2(t)$, let us define the $s_{21}$ coefficient as:
+            \begin{equation}
+                s_{21}=\int\limits_{0}^{T}s_2(t)\phi_1(t)dt\nonumber
+            \end{equation}
+                \item To help in getting the basis function $\phi_2(t)$, we define the intermediate function:
+                \begin{equation}
+                    g_2(t)=s_2(t)-s_{21}\phi_1(t)\nonumber
+                \end{equation}
+                which is orthogonal to $\phi_1(t)$ over the interval $0\le{t}\le{T}$
+        \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Creating the Second Basis Function}
+
+    \begin{itemize}
+        \item The second basis function can be defined as:
+        \begin{equation}
+            \phi_2(t)=\frac{g_2(t)}{\sqrt{\int\limits_{0}^{T}g_2^2(t)dt}}
+        \end{equation}
+        which can be expanded to:
+        \begin{equation}
+            \phi_2(t)=\frac{s_2(t)-s_{21}\phi_1(t)}{\sqrt{E_{s_2}-s_{21}^2}}
+        \end{equation}
+        where $E_{s_2}$ is the energy of the signal $s_2(t)$.
+        \item It is clear that the basis function $\phi_2(t)$ satisfies:
+        \begin{equation}
+            \int\limits_0^T\phi_2^2(t)dt=1\quad\mathsf{and}\quad\int\limits_0^T\phi_1(t)\phi_2(t)dt=0\nonumber
+        \end{equation}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{General Expressions}
+
+    \begin{itemize}
+        \item In general, we can define the following functions that can be employed in an iterative procedure for generating a set of orthonormal basis functions:
+        \begin{equation}
+        \begin{split}
+            g_i(t)&=s_i(t)-\sum\limits_{j=1}^{i-1}s_{ij}\phi_j(t)\\
+            s_{ij}&=\int\limits_0^Ts_i(t)\phi_j(t)dt,~j=1,2,\ldots,i-1\\
+            \phi_i(t)&=\frac{g_i(t)}{\sqrt{\int\limits_0^Tg_i^2(t)dt}},~i=1,2,\ldots,N\nonumber
+        \end{split}
+        \end{equation}
+    \end{itemize}
+
+}
+
+
+
+
+\frame
+{
+  \frametitle{In-Class Problem}
+
+    \begin{itemize}
+        \item Carry out the Gram-Schmidt Orthogonalization procedure of the signals shown in the next figure in the order $s_3(t)$, $s_1(t)$, $s_4(t)$, $s_2(t)$ and thus obtain a set of orthonormal functions $\{\phi_m(t)\}$
+        \item Then, determine the vector representation of the signals $\{s_n(t)\}$ by using the orthonormal functions $\{\phi_m(t)\}$
+    \end{itemize}
+
+}
+
+
+\frame
+{
+  \frametitle{Determining Orthonormal Basis Functions -- Part~I}
+
+    \begin{itemize}
+        \item For $s_3(t)$:
+        \begin{equation}
+            \phi_1(t)=\frac{s_3(t)}{\sqrt{E_{s_3}}}=\frac{s_3(t)}{\sqrt{3}}\nonumber
+        \end{equation}
+        \item For $s_1(t)$:
+        \begin{equation}
+        \begin{split}
+            g_2(t)&=s_1(t)-s_{12}\phi_1(t)=s_1(t)-\frac{2}{3}s_3(t)=\left\{
+            \begin{array}{cc}
+              1/3, & 0\le{t}<2 \\
+              2/3, & 2\le{t}<3 \\
+              0,   & t\ge{3}
+            \end{array}
+            \right.\\
+            \therefore&~\phi_2(t)=\frac{g_2(t)}{\sqrt{\int\limits_0^Tg_2^2(t)dt}}=\left\{
+            \begin{array}{cc}
+              1/\sqrt{6}, & 0\le{t}<2 \\
+              2/\sqrt{6}, & 2\le{t}<3 \\
+              0,   & t\ge{3}
+            \end{array}
+            \right.\nonumber
+        \end{split}
+        \end{equation}
+    \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Determining Orthonormal Basis Functions -- Part~II}
+
+    \begin{itemize}
+        \item For $s_4(t)$:
+        \begin{equation}
+        \begin{split}
+            g_3(t)&=s_4(t)-\sum\limits_{j=1}^{2}s_{4j}\phi_j(t)=0\\
+            \therefore&~\phi_3(t)=0\nonumber
+        \end{split}
+        \end{equation}
+        \item For $s_4(t)$:
+        \begin{equation}
+        \begin{split}
+            g_4(t)&=s_2(t)-\sum\limits_{j=1}^{3}s_{2j}\phi_j(t)=0\\
+            \therefore&~\phi_4(t)=\frac{g_4(t)}{\sqrt{\int\limits_0^Tg_4^2(t)dt}}=\frac{s_2(t)}{\sqrt{2}}\nonumber
+        \end{split}
+        \end{equation}
+    \end{itemize}
+
+
+}
+
+\frame
+{
+  \frametitle{Vector Representations}
+
+    \begin{itemize}
+        \item Using the orthonormal basis functions $\{\phi_1(t),\phi_2(t),\phi_4(t)\}$, we can express the four waveforms as:
+            \begin{itemize}
+                \item $\mathbf{s}_1=(2/\sqrt{3},\sqrt{6}/3,0)$
+                \item $\mathbf{s}_2=(0,0,\sqrt{2})$
+                \item $\mathbf{s}_3=(\sqrt{3},0,0)$
+                \item $\mathbf{s}_4=(-1/\sqrt{3},-4/\sqrt{6},0)$
+            \end{itemize}
+    \end{itemize}
+
+}
+
+
+
+\end{document}

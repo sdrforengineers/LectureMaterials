@@ -1,0 +1,193 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+
+\title{Lecture 07: Power Efficiency Definition, Pulse Amplitude Modulation}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{4.2.1-4.2.2}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame
+{
+  \frametitle{BPAM Modulation}
+
+  \begin{itemize}
+    \item The process of modulation can be viewed as a mapping of $b$ bits into a symbol
+    \begin{itemize}
+        \item The message $m_b$ is a $b$-vector of binary digits
+    \end{itemize}
+    \item For each $m_b$ (there are $2^b$ values of $m_b$ available), we need a unique signal $s_i(t)$, $1\le{i}\le{2^b}$
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Signal Constellation}
+
+  \begin{itemize}
+  \item Modulation rule:
+  \begin{itemize}
+    \item $``1"\rightarrow s_{1}(t)$
+    \item $``0"\rightarrow s_{2}(t)$
+  \end{itemize}
+  \item The {\it bit rate} is defined as $R_{b}=1/T$~bps
+  \item The {\it symbol energy} is defined as $E_{s}=\int_{-\infty}^{\infty}s^2(t)dt$ [Joules]
+  \item Suppose we have the following modulation rule given the waveform:
+  \begin{equation}
+    s(t)=A\cdot[u(t)-u(t-T)]
+  \end{equation}
+  where $u(t)$ is the unit step function, then:
+  \begin{itemize}
+    \item $``1"\rightarrow{s(t)}$
+    \item $``0"\rightarrow{-s(t)}$
+  \end{itemize}
+  \end{itemize}
+
+}
+\frame
+{
+  \frametitle{Average Bit Energy}
+
+  \begin{itemize}
+  \item The symbol energy is then $E_{s}$=$E_{-s}$=$A^2T$=$\frac{A^2}{R_b}$
+    \begin{itemize}
+        \item Notice how $E_{s}$ decreases as $R_{b}$ increases
+    \end{itemize}
+  \item We define the energy per bit as:
+  \begin{equation}
+    \bar{E}_{b}=P(1)\cdot\int_{-\infty}^{\infty}s_{1}^2(t)dt+P(0)\cdot\int_{-\infty}^{\infty}s_{2}^2(t)dt
+  \end{equation}
+  where $P(1)$ is the probability that the bit is a ``1'', and $P(0)$ is the probability that the bit is a ``0''
+  \item Suppose $s_{1}(t)=s(t)$ and $s_{2}(t)=-s(t)$, then:
+  \begin{equation}
+    \bar{E}_{b}=E_{s}\{P(1)+P(0)\}=E_{s}=\int_{-\infty}^{\infty}s^2(t)dt=A^2T
+  \end{equation}
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{Euclidean Distance: $s_i(t)$ Versus $s_j(t)$}
+
+    \begin{itemize}
+     \item We define the {\it Euclidean Distance} as:
+     \begin{equation}
+        d_{ij}^2=\int_{-\infty}^{\infty}(s_{i}(t)-s_{j}(t))^2{dt}=E_{\Delta{s_{ij}}}
+     \end{equation}
+     where $\Delta{s_{ij}}(t)=s_{i}(t)-s_{j}(t)$
+     \item For a signal, $s_{i}(t)$, used for modulation:
+     \begin{equation}
+        d_{min}^2=\min\limits_{s_i(t),s_j(t),i\neq{j}}\int_{-\infty}^{\infty}(s_{i}(t)-s_{j}(t))^2{dt}
+     \end{equation}
+
+    \end{itemize}
+}
+
+\frame
+{
+  \frametitle{Power Efficiency $\varepsilon_p$}
+
+  \begin{itemize}
+    \item The {\it Power Efficiency} of a signal set used for modulation is given by the expression:
+    \begin{equation}
+        \varepsilon_{p} = \frac{d_{\min}^2}{\bar{E}_{b}}
+    \end{equation}
+    \item Suppose we would like to find the $\varepsilon_{p}$ for Binary PAM
+    \begin{itemize}
+        \item Given the waveforms:
+        \begin{equation}
+        \begin{split}
+            s_1(t)&=A\cdot[u(t)-u(t-T)]=s(t)\\
+            s_2(t)&=-A\cdot[u(t)-u(t-T)]=-s(t)
+        \end{split}
+        \end{equation}
+        where $u(t)$ is the unit step function
+     \item Compute the minimum Euclidean Distance: $d_{\min}^2=\int_{-\infty}^{\infty} \Delta s_{ij}^2(t) dt= 4A^2T$
+     \item Compute the average bit energy: $\bar{E}_{b}$=$E_{s}\{P(1)+P(0)\}=E_{s}=\int_{-\infty}^{\infty} s^2(t) dt=A^2T$
+     \item Compute the power efficiency: $\varepsilon_{P} = d_{\min}^2/\bar{E}_{b}=4$
+    \end{itemize}
+  \end{itemize}
+
+}
+
+\frame
+{
+  \frametitle{MPAM Modulation Format}
+
+  \begin{itemize}
+    \item We can expression the $M$-ary PAM waveform as:
+    \begin{equation}
+        s_i(t)=A_i\cdot{p(t)},~\mathsf{for}~i=1,2,\ldots,M/2
+    \end{equation}
+    where $A_i=A(2i-1)$, $p(t)=u(t)-u(t-T)$, and $u(t)$ is the unit step function
+  \end{itemize}
+  
+}
+\frame
+{
+  \frametitle{Computing $\varepsilon_{p,\mathsf{M-PAM}}$}
+
+    \begin{itemize}
+        \item Selecting the $d_{\min}^2$ pair $s_1(t)=A\cdot{p(t)}$ and $s_2(t)=-A\cdot{p(t)}$
+        \begin{itemize}
+            \item Solving $\Delta{s(t)}=2A\cdot{p(t)}\rightarrow{d_{\min}^2}=4A^2T$
+        \end{itemize}
+        \item Find $\bar{E}_s$ in general else only positive symbols due to symmetry of signal constellation, which yields:
+        \begin{equation}
+        \begin{split}
+            \bar{E}_s&=\frac{2}{M}A^2T\sum\limits_{i=1}^{M/2}(2i-1)^2\\
+            &=A^2T\frac{(M^2-1)}{3}\quad\mathsf{which~is~simplified~via~tables}\\
+            &\quad\rightarrow{\bar{E}_b=\frac{\bar{E}_s}{\log_2(M)}}=\frac{A^2T(2^{2b}-1)}{3b}\nonumber
+        \end{split}
+        \end{equation}
+        \item Solving for the power efficiency yields $\varepsilon_{p,\mathsf{M-PAM}}=\frac{12b}{2^{2b}-1}$
+    \end{itemize}
+
+}
+
+\end{document}

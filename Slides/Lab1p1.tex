@@ -1,0 +1,192 @@
+\documentclass[10pt]{beamer}
+
+\usetheme{metropolis}
+\definecolor{WiLabRed}{RGB}{197,18,48}
+\setbeamercolor{frametitle}{fg=white,bg=WiLabRed}
+\setbeamercolor{progress bar}{fg=WiLabRed!90}
+\setbeamercolor{title separator}{fg=WiLabRed!90}
+\setbeamercolor{progress bar in section page}{fg=WiLabRed!90}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{alerted text}{fg=WiLabRed!90}
+
+\usepackage{appendixnumberbeamer}
+
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+
+\usepackage{marvosym}
+%\usepackage{subfig}
+\usepackage{graphicx}\graphicspath{{images/}}
+\usepackage{subcaption}
+\usepackage[framed]{./support/mcode}
+\usepackage{listings}
+\usepackage{amsmath}
+
+\DeclareMathOperator{\sinc}{sinc}
+
+\title{Laboratory 1 (Part 1): Square-Root Raised Cosine Pulse Shaping, Timing Error}
+\subtitle{\textit{Software Defined Radio for Engineers} (Collins~\textit{et al.}), \textsection{6.1-6.2}}
+\date{}
+\author{\textbf{Alexander M. Wyglinski, Ph.D.}}
+\institute{ \vspace*{1in}\hfill\includegraphics[height=1.125cm]{wilab_logo-A70916.eps} \qquad \includegraphics[height=1.125cm]{WPI_Inst_Prim_FulClr.eps}}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+% Foot for all slides
+\setbeamertemplate{frame footer}{\tiny \copyright~2018 by Alexander Wyglinski. This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.}
+
+\begin{document}
+
+%\captionsetup[subfigure]{labelformat=empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Square-Root Raised Cosine Pulse Shapes}
+
+
+Square-root raised cosine (SRRC) has the impulse response:
+%
+\begin{equation}
+	h_{\sqrt{\mathrm{RC}}}(t) = \begin{cases}
+ \dfrac{1}{\sqrt{T_s}} \left( 1-\beta+4\dfrac{\beta}{\pi} \right),
+       & t = 0 \\
+
+\dfrac{\beta}{\sqrt{2T_s}}
+\left[
+\left(1+\dfrac{2}{\pi}\right)\sin\left(\dfrac{\pi}{4\beta}\right) +
+\left(1-\dfrac{2}{\pi}\right)\cos\left(\dfrac{\pi}{4\beta}\right)
+\right],
+       & t = \pm \dfrac{T_s}{4\beta} \\
+
+\dfrac{1}{\sqrt{T_s}} \dfrac{\sin\left[\pi \dfrac{t}{T_s}\left(1-\beta\right)\right] +
+4\beta\dfrac{t}{T_s}\cos\left[\pi\dfrac{t}{T_s}\left(1+\beta\right)\right]}{\pi
+\dfrac{t}{T_s}\left[1-\left(4\beta\dfrac{t}{T_s} \right)^2 \right]},
+       & \mbox{otherwise}
+\end{cases}
+\end{equation}
+where $T_s$ is the symbol period and $\beta \in \big[0,1\big]$ is the roll-off factor. 
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Why SRRCs?}
+
+\centering
+$H_{\sqrt{\mathrm{RC}}}(f)=\sqrt{H_{\mathrm{RC}}(f)}$\\
+$\downarrow$\\
+$H_{\mathrm{RC}}(f)$ satisfy Nyquist Criterion for Zero Intersymbol Interference (ISI)\\
+$\downarrow$\\
+Zero ISI results in transmissions whose symbols are not corrupted by previous and/or future symbols
+ 
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Raised Cosine Pulse Shapes}
+
+We define a raised cosine (RC) pulse shape as:
+\begin{equation}
+ H_{\mathrm{RC}}(f)=
+ \begin{cases}
+  T,& 0\le{|f|}\le\frac{1-\beta}{2T}\\
+  \frac{T}{2}\left(1+\cos{\left(\frac{\pi{t}}{\beta}\left(|f|-\frac{1-\beta}{T}\right)\right)}\right),&\frac{1-\beta}{2T}\le{|f|}\le\frac{1+\beta}{2T}\\
+  0,&\mathrm{otherwise}
+ \end{cases}
+\end{equation}
+\begin{equation}
+ h_{\mathrm{RC}}=\frac{\cos(2\pi\beta{t}/T)\sinc(t/T)}{1-(2\beta{t}/T)^2}
+\end{equation}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Raised Cosine Pulse Shapes}
+
+\centering
+
+How do these pulse shapes look like in the time and frequency domains?
+ 
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Using SRRC Pulse Shapes}
+
+
+Since SRRC pulse shapes are like any other type of filter, one can use a series of impulses defined by symbol data to produce a pulse shaped output
+
+$\rightarrow$ \textit{Impulse Train Model}
+ 
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Timing Error Model}
+ 
+A generic timing offset error model can be expressed as:
+\begin{equation}
+ r(t)=\sum\limits_{n}x(n)h(t-\tau(t)-nT_s)+v(t)
+\end{equation}
+where:
+\begin{itemize}
+ \item $x(n)$ is the transmitted symbol
+ \item $h(t)$ is the pulse shape of the transmit filter
+ \item $\tau(t)$ is the fractional delay offset
+ \item $T_s$ is the sampling period
+ \item $n$ is the sampling index
+ \item $v(t)$ is the additive channel noise
+\end{itemize}
+
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Timing Error Model -- Post-Reception}
+
+Once the receive matched filter is applied, we get:
+\begin{equation}
+ y(t)=\sum\limits_{n}x(n)h_A(t-\tau(t)-nT_s)+v_h(t)
+\end{equation}
+where:
+\begin{itemize}
+ \item $h_A(t)=h(t)\ast{\bar{h}(-t)}$ $\rightarrow$ autocorrelation of transmit filter with its conjugate
+ \item $v_h(t)$ is shaped noise
+\end{itemize}
+
+ 
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Timing Error Model Illustration}
+
+How does timing error look like between the transmitter and receiver when two free-running clocks are used?
+ 
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}
